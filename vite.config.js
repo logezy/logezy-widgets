@@ -7,12 +7,12 @@ export default defineConfig({
       customElement: true,
     }),
   ],
-  define: {
-    'process.env.NODE_ENV': '"production"',
-  },
   build: {
     target: "es2018",
     minify: "esbuild",
+    esbuild: {
+      pure: ['process.env.NODE_ENV'],
+    },
     lib: {
       entry: "src/main.js",
       name: "LogezyWidgets",
