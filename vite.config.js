@@ -7,12 +7,16 @@ export default defineConfig({
       customElement: true,
     }),
   ],
+  define: {
+    "process.env.NODE_ENV": '"production"', // turn env checks into a string literal
+    "process.env": "{}",                     // guard any broader env access
+    "process.browser": "true",               // some libs probe this
+    global: "window",                        // some libs reference `global`
+  },
   build: {
     target: "es2018",
     minify: "esbuild",
-    esbuild: {
-      pure: ['process.env.NODE_ENV'],
-    },
+    sourcemap: false,
     lib: {
       entry: "src/main.js",
       name: "LogezyWidgets",
