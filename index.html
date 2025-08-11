@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Logezy Widget Dev</title>
+    <script type="module" src="/src/main.js"></script>
+
+    <!-- Load widget JS (local or CDN) -->
+    <!-- <script src="./dist/widgets.min.js"></script> -->
+</head>
+
+<body>
+    <h1>Local Dev Preview</h1>
+    <!-- <recruitment-openings tenant="demo"></recruitment-openings> -->
+
+    <recruitment-openings api-url="http://localhost:3000" tenant="demo_agency">
+        <div>
+            Your browser doesn't support embedded opening widgets. Visit
+            <a href="https://example.com/careers">our careers</a>.
+        </div>
+    </recruitment-openings>
+</body>
+
+</html>

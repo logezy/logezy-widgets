@@ -1,0 +1,21 @@
+{
+  "name": "recruitment-widget",
+  "version": "1.0.0",
+  "description": "Vue 3 Recruitment Openings Web Component for embedding via CDN",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "terser": "^5.43.1",
+    "vite": "^5.0.0",
+    "vite-plugin-css-injected-by-js": "^3.5.2"
+  },
+  "license": "MIT"
+}
