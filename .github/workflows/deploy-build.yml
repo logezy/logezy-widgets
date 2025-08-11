@@ -36,10 +36,11 @@ jobs:
 
       - name: Assert bundle has no live process.env
         run: |
-          if grep -R "process\.env\.NODE_ENV" dist/widgets.min.js; then
+          if grep -n "process\.env\.NODE_ENV" dist/widgets.min.js; then
             echo "Found process.env.NODE_ENV in widgets.min.js — failing build"
             exit 1
           fi
+
 
       - name: Deploy dist to build branch
         uses: peaceiris/actions-gh-pages@v4
