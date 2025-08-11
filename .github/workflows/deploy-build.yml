@@ -2,8 +2,7 @@ name: Deploy Build to Build Branch
 
 on:
   push:
-    branches:
-      - main  # or your development branch
+    branches: [main]
 
 jobs:
   build:
@@ -17,12 +16,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
-      - name: Install dependencies
+      - name: Print env + versions (debug)
+        run: |
+          node -v
+          npm -v
+          npx vite --version || true
+          echo "NODE_ENV=$NODE_ENV"
+          echo "CI=$CI"
+
+      - name: Install deps (use lockfile)
         run: npm ci
 
-      - name: Build project
-        run: npm run build
+      - name: Build (force production mode)
+        env:
+          NODE_ENV: production
+        run: npx vite build --mode production
+
+      - name: Assert bundle has no live process.env
+        run: |
+          if grep -R "process\.env\.NODE_ENV" dist/widgets.min.js; then
+            echo "Found process.env.NODE_ENV in widgets.min.js — failing build"
+            exit 1
+          fi
 
       - name: Deploy dist to build branch
         uses: peaceiris/actions-gh-pages@v4
