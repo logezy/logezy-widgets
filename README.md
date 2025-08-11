@@ -66,7 +66,8 @@ This component displays a list of recruitment openings.
 
 **Attributes:**
 
-- `tenant`: (Required) The identifier for the tenant whose job openings should be displayed.
+- `api-url`: (Required) The base URL or endpoint of the API that provides the job openings data. This URL will be used by the widget to fetch and display the relevant openings.
+- `tenant`: (Required) A unique identifier representing the tenant or client whose job openings are to be displayed. This allows the widget to filter and fetch openings specific to the designated tenant.
 
 **Example:**
 
@@ -80,7 +81,10 @@ To use the widget, include one of the following script tags in your HTML file, t
   src="https://cdn.jsdelivr.net/gh/logezy/logezy-widgets@build/widgets.esm.js"
 ></script>
 
-<recruitment-openings api-url="url" tenant="tenant_slug"></recruitment-openings>
+<recruitment-openings
+  api-url="base url"
+  tenant="tenant_slug"
+></recruitment-openings>
 ```
 
 #### IIFE (Legacy Browsers)
@@ -88,7 +92,7 @@ To use the widget, include one of the following script tags in your HTML file, t
 ```html
 <script src="https://cdn.jsdelivr.net/gh/logezy/logezy-widgets@build/widgets.min.js"></script>
 
-<recruitment-openings api-url="url" tenant="tenant_slug">
+<recruitment-openings api-url="base url" tenant="tenant_slug">
   <div>
     Your browser doesn't support embedded opening widgets. Visit
     <a href="https://logezy.com">our careers</a>.
