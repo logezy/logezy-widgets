@@ -1,5 +1,5 @@
 {
-  "name": "recruitment-widget",
+  "name": "logezy-widget",
   "version": "1.0.0",
   "description": "Vue 3 Recruitment Openings Web Component for embedding via CDN",
   "type": "module",
