@@ -12,7 +12,7 @@ export default defineConfig({
     minify: "esbuild",
     lib: {
       entry: "src/main.js",
-      name: "LogezyRecruitmentWidget",
+      name: "LogezyWidgets",
       formats: ["iife", "esm"],
       fileName: (format) => format === "iife" ? "widgets.min.js" : `widgets.${format}.js`,
     },
