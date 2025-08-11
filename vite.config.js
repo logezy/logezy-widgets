@@ -8,10 +8,8 @@ export default defineConfig({
     }),
   ],
   define: {
-    "process.env.NODE_ENV": '"production"', // turn env checks into a string literal
-    "process.env": "{}",                     // guard any broader env access
-    "process.browser": "true",               // some libs probe this
-    global: "window",                        // some libs reference `global`
+    "process.env.NODE_ENV": '"production"',
+    global: "globalThis",
   },
   build: {
     target: "es2018",
@@ -24,12 +22,16 @@ export default defineConfig({
       fileName: (format) => format === "iife" ? "widgets.min.js" : `widgets.${format}.js`,
     },
     rollupOptions: {
-      external: ["vue"],
       inlineDynamicImports: true,
       output: {
-        globals: { vue: "Vue" },
-        banner: prelude,
         manualChunks: undefined,
+        // Inline banner: creates window.process/env + global before your code runs
+        banner: `;(function () {
+          var w = typeof window !== 'undefined' ? window : self;
+          if (typeof w.process === 'undefined') w.process = { env: { NODE_ENV: 'production' } };
+          else if (typeof w.process.env === 'undefined') w.process.env = { NODE_ENV: 'production' };
+          if (typeof w.global === 'undefined') w.global = w;
+        })();`,
       },
     },
   },
