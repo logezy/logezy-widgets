@@ -24,8 +24,11 @@ export default defineConfig({
       fileName: (format) => format === "iife" ? "widgets.min.js" : `widgets.${format}.js`,
     },
     rollupOptions: {
+      external: ["vue"],
       inlineDynamicImports: true,
       output: {
+        globals: { vue: "Vue" },
+        banner: prelude,
         manualChunks: undefined,
       },
     },
