@@ -21,8 +21,8 @@ Supports both modern `<script type="module">` and legacy `<script src="...">` us
 
 ```bash
 # clone repo
-git clone https://github.com/<you>/logezy-widget.git
-cd logezy-widget
+git clone https://github.com/<you>/logezy-widgets.git
+cd logezy-widgets
 
 # install deps
 npm install
