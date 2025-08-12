@@ -202,7 +202,6 @@ export default defineComponent({
 
 .body {
   min-height: 40px;
-  background-color: #b91c1c;
 }
 
 .status {
