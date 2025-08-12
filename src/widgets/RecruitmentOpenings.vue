@@ -46,122 +46,126 @@
   </div>
 </template>
 
-<script>
-import { defineComponent, ref, onMounted, watch } from "vue";
+<script setup lang="ts">
+import { ref, onMounted, watch, type PropType } from "vue";
 
-export default defineComponent({
-  name: "RecruitmentOpenings",
-  props: {
-    apiUrl: { type: String, default: "http://localhost:3000" },
-    issuer: { type: String, default: "logezy" },
-    tenant: { type: String, default: "demo_agency" },
+interface Job {
+  id: string;
+  title: string;
+  location: string;
+  type: string;
+  excerpt: string;
+  url: string;
+}
+
+interface RecruitmentOpeningsProps {
+  apiUrl: string;
+  issuer: string;
+  tenant: string;
+}
+
+interface ApiResponse {
+  data: any[]; // This will be further refined with Job type
+}
+
+const props = defineProps<RecruitmentOpeningsProps>();
+
+const loading = ref<boolean>(false);
+const error = ref<string | null>(null);
+const jobs = ref<Job[]>([]);
+
+// demo data so component works out of the box
+const demoJobs: Job[] = [
+  {
+    id: "demo-1",
+    title: "Frontend Engineer (Demo)",
+    location: "Remote",
+    type: "Full-time",
+    excerpt: "Build delightful web experiences. Demo listing.",
+    url: "https://example.com/demo-1",
   },
-  setup(props) {
-    const loading = ref(false);
-    const error = ref(null);
-    const jobs = ref([]);
+  {
+    id: "demo-2",
+    title: "Backend Engineer (Demo)",
+    location: "Bengaluru, India",
+    type: "Full-time",
+    excerpt: "Work on APIs and infrastructure. Demo listing.",
+    url: "https://example.com/demo-2",
+  },
+];
 
-    // demo data so component works out of the box
-    const demoJobs = [
-      {
-        id: "demo-1",
-        title: "Frontend Engineer (Demo)",
-        location: "Remote",
-        type: "Full-time",
-        excerpt: "Build delightful web experiences. Demo listing.",
-        url: "https://example.com/demo-1",
-      },
-      {
-        id: "demo-2",
-        title: "Backend Engineer (Demo)",
-        location: "Bengaluru, India",
-        type: "Full-time",
-        excerpt: "Work on APIs and infrastructure. Demo listing.",
-        url: "https://example.com/demo-2",
-      },
-    ];
+async function fetchJobsForTenant(t: string): Promise<void> {
+  loading.value = true;
+  error.value = null;
+  jobs.value = [];
 
-    async function fetchJobsForTenant(t) {
-      loading.value = true;
-      error.value = null;
-      jobs.value = [];
-
-      try {
-        // If no tenant provided use demo data (safe default)
-        if (!t) {
-          // simulated network latency
-          await new Promise((r) => setTimeout(r, 300));
-          jobs.value = demoJobs;
-          return;
-        }
-
-        // Replace this URL with your real API endpoint
-        // const url = `https://api.example.com/tenants/${encodeURIComponent(
-        //   t
-        // )}/openings`;
-
-        const url = `${props.apiUrl}/v1/public/${encodeURIComponent(t)}/openings?limit=10&offset=0`;
-
-        const res = await fetch(url, {
-          method: "GET",
-          credentials: "omit",
-          headers: {
-            "Content-Type": "application/json",
-            "X-APPLICATION": "logezy",
-          },
-        });
-        
-        if (!res.ok) {
-          // For predictable errors, read JSON or text
-          const text = await res.text();
-          throw new Error(`${res.status} ${res.statusText} — ${text}`);
-        }
-
-        // Expect the API to return an array of job objects
-        const data = await res.json();
-
-       
-        if (!Array.isArray(data.data)) {
-          throw new Error("Unexpected API response format (expected array)");
-        }
-
-        jobs.value = data.data.map((item, idx) => ({
-          id: item.id ?? item.jobId ?? `job-${idx}`,
-          title: item.title ?? item.name ?? "Untitled",
-          location: item.location ?? item.city ?? "",
-          type: item.type ?? item.employmentType ?? "",
-          excerpt:
-            item.excerpt ??
-            item.summary ??
-            item.description?.slice(0, 140) ??
-            "",
-          url: item.url ?? item.applyUrl ?? "",
-        }));
-      } catch (err) {
-        console.error("RecruitmentOpenings fetch error:", err);
-        error.value = err && err.message ? err.message : String(err);
-        jobs.value = [];
-      } finally {
-        loading.value = false;
-      }
+  try {
+    // If no tenant provided use demo data (safe default)
+    if (!t) {
+      // simulated network latency
+      await new Promise((r) => setTimeout(r, 300));
+      jobs.value = demoJobs;
+      return;
     }
 
-    onMounted(() => fetchJobsForTenant(props.tenant));
-    watch(
-      () => props.tenant,
-      (nv) => {
-        fetchJobsForTenant(nv);
-      }
-    );
+    // Replace this URL with your real API endpoint
+    // const url = `https://api.example.com/tenants/${encodeURIComponent(
+    //   t
+    // )}/openings`;
 
-    return {
-      loading,
-      error,
-      jobs,
-      tenant: props.tenant,
-    };
-  },
-});
+    const url = `${props.apiUrl}/v1/public/${encodeURIComponent(t)}/openings?limit=10&offset=0`;
+
+    const res: Response = await fetch(url, {
+      method: "GET",
+      credentials: "omit",
+      headers: {
+        "Content-Type": "application/json",
+        "X-APPLICATION": "logezy",
+      },
+    });
+    
+    if (!res.ok) {
+      // For predictable errors, read JSON or text
+      const text: string = await res.text();
+      throw new Error(`${res.status} ${res.statusText} — ${text}`);
+    }
+
+    // Expect the API to return an array of job objects
+    const data: ApiResponse = await res.json();
+
+   
+    if (!Array.isArray(data.data)) {
+      throw new Error("Unexpected API response format (expected array)");
+    }
+
+    jobs.value = data.data.map((item: any, idx: number): Job => ({
+      id: item.id ?? item.jobId ?? `job-${idx}`,
+      title: item.title ?? item.name ?? "Untitled",
+      location: item.location ?? item.city ?? "",
+      type: item.type ?? item.employmentType ?? "",
+      excerpt:
+        item.excerpt ??
+        item.summary ??
+        item.description?.slice(0, 140) ??
+        "",
+      url: item.url ?? item.applyUrl ?? "",
+    }));
+  } catch (err: any) {
+    console.error("RecruitmentOpenings fetch error:", err);
+    error.value = err && err.message ? err.message : String(err);
+    jobs.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(() => fetchJobsForTenant(props.tenant));
+watch(
+  () => props.tenant,
+  (nv: string) => {
+    fetchJobsForTenant(nv);
+  }
+);
 </script>
 
 <style scoped>

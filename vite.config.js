@@ -6,6 +6,15 @@ export default defineConfig({
   plugins: [
     vue({
       customElement: true,
+      script: { 
+        defineModel: true,
+        propsDestructure: true
+      },
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.includes('logezy-')
+        }
+      }
     }),
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
@@ -21,7 +30,7 @@ export default defineConfig({
     target: "es2018",
     minify: "esbuild",
     lib: {
-      entry: "src/main.js",
+      entry: "src/main.ts",
       name: "LogezyWidgets",
       formats: ["iife", "esm"],
       fileName: (f) => (f === "iife" ? "widgets.min.js" : `widgets.${f}.js`),

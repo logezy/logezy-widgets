@@ -6,17 +6,24 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
     "vue": "^3.4.0"
   },
   "devDependencies": {
+    "@rollup/plugin-replace": "^5.0.7",
+    "@types/node": "^24.2.1",
+    "@typescript-eslint/eslint-plugin": "^8.39.1",
+    "@typescript-eslint/parser": "^8.39.1",
     "@vitejs/plugin-vue": "^5.0.0",
+    "@vue/tsconfig": "^0.7.0",
     "terser": "^5.43.1",
+    "typescript": "^5.9.2",
     "vite": "^5.0.0",
     "vite-plugin-css-injected-by-js": "^3.5.2",
-    "@rollup/plugin-replace": "^5.0.7"
+    "vue-tsc": "^3.0.5"
   },
   "license": "MIT"
 }
