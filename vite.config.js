@@ -12,24 +12,11 @@ export default defineConfig({
       preventAssignment: true,
     })
   ],
-  // Force Vue’s browser prod runtime (no process.env in it)
   resolve: {
     alias: {
       vue: "vue/dist/vue.runtime.esm-browser.prod.js",
     },
   },
-
-  // Still helpful, but the alias above is the key part
-  define: {
-    "process.env.NODE_ENV": JSON.stringify("production"),
-    global: "globalThis",
-  },
-  optimizeDeps: {
-    esbuildOptions: {
-      define: { "process.env.NODE_ENV": JSON.stringify("production"), global: "globalThis" },
-    },
-  },
-
   build: {
     target: "es2018",
     minify: "esbuild",
@@ -41,7 +28,6 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        manualChunks: undefined,
       },
     },
   },
