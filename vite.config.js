@@ -1,6 +1,6 @@
-import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
-import replace from '@rollup/plugin-replace';
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import replace from '@rollup/plugin-replace'
 
 export default defineConfig({
   plugins: [
@@ -23,21 +23,21 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      vue: "vue/dist/vue.runtime.esm-browser.prod.js",
+      vue: 'vue/dist/vue.runtime.esm-browser.prod.js',
     },
   },
   build: {
-    target: "es2018",
-    minify: "esbuild",
+    target: 'es2018',
+    minify: 'esbuild',
     lib: {
-      entry: "src/main.ts",
-      name: "LogezyWidgets",
-      formats: ["iife", "esm"],
-      fileName: (f) => (f === "iife" ? "widgets.min.js" : `widgets.${f}.js`),
+      entry: 'src/main.ts',
+      name: 'LogezyWidgets',
+      formats: ['iife', 'esm'],
+      fileName: (f) => (f === 'iife' ? 'widgets.min.js' : `widgets.${f}.js`),
     },
     rollupOptions: {
       output: {
       },
     },
   },
-});
+})
