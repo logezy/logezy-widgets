@@ -94,26 +94,19 @@ const demoJobs: Job[] = [
   },
 ]
 
-async function fetchJobsForTenant(t: string): Promise<void> {
+async function fetchJobsForTenant(tenant: string): Promise<void> {
   loading.value = true
   error.value = null
   jobs.value = []
 
   try {
-    // If no tenant provided use demo data (safe default)
-    if (!t) {
-      // simulated network latency
+    if (!tenant) {
       await new Promise((r) => setTimeout(r, 300))
       jobs.value = demoJobs
       return
     }
 
-    // Replace this URL with your real API endpoint
-    // const url = `https://api.example.com/tenants/${encodeURIComponent(
-    //   t
-    // )}/openings`;
-
-    const url = `${props.apiUrl}/v1/public/${encodeURIComponent(t)}/openings?limit=10&offset=0`
+    const url = `${props.apiUrl}/v1/public/${encodeURIComponent(tenant)}/openings?limit=10&offset=0`
 
     const res: Response = await fetch(url, {
       method: 'GET',
@@ -121,16 +114,15 @@ async function fetchJobsForTenant(t: string): Promise<void> {
       headers: {
         'Content-Type': 'application/json',
         'X-APPLICATION': 'logezy',
+        'X-CLIENT-PLATFORM': 'web',
       },
     })
     
     if (!res.ok) {
-      // For predictable errors, read JSON or text
       const text: string = await res.text()
       throw new Error(`${res.status} ${res.statusText} — ${text}`)
     }
 
-    // Expect the API to return an array of job objects
     const data: ApiResponse = await res.json()
 
    
