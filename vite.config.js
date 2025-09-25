@@ -18,17 +18,26 @@ export default defineConfig({
     }),
     replace({
       'process.env.NODE_ENV': JSON.stringify('production'),
+      '__VUE_HMR_RUNTIME__': 'undefined',
       preventAssignment: true,
     })
   ],
+  define: {
+    __VUE_OPTIONS_API__: 'true',
+    __VUE_PROD_DEVTOOLS__: 'false',
+    __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: 'false'
+  },
+  css: {
+    postcss: './postcss.config.js',
+  },
   resolve: {
     alias: {
-      vue: 'vue/dist/vue.runtime.esm-browser.prod.js',
+      vue: 'vue/dist/vue.esm-bundler.js',
     },
   },
   build: {
     target: 'es2018',
-    minify: 'esbuild',
+    minify: 'terser',
     lib: {
       entry: 'src/main.ts',
       name: 'LogezyWidgets',
@@ -37,6 +46,15 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
+        assetFileNames: () => {
+          return 'widgets.[ext]'
+        }
+      },
+    },
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
       },
     },
   },

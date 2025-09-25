@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@layer base {
+  :host {
+    display: block;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #111827;
+  }
+}

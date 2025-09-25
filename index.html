@@ -2,19 +2,53 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>Logezy Widget Dev</title>
-    <script type="module" src="/src/main.ts"></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Logezy Widgets – Local Development Preview</title>
+  <meta name="description" content="Preview and test all Logezy widgets locally with mock API configuration." />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="https://appv2.logezyhr.co.uk/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="https://appv2.logezyhr.co.uk/favicon.png" />
+
+  <!-- Open Graph / Social -->
+  <meta property="og:title" content="Logezy Widgets – Local Dev Preview" />
+  <meta property="og:description" content="Preview and test the suite of Logezy widgets locally." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="http://localhost:5173/" />
+  <meta property="og:image" content="/preview.png" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Script entry point -->
+  <script type="module" src="/src/main.ts"></script>
 </head>
 
-<body>
-    <h1>Local Dev Preview</h1>
-    <recruitment-openings api-url="http://localhost:3000" tenant="demo_agency">
-        <div>
-            Your browser doesn't support embedded opening widgets. Visit
-            <a href="https://example.com/careers">our careers</a>.
+<body class="font-sans p-8 bg-gray-50 text-gray-900 leading-relaxed">
+  <header class="mb-8 pb-4 border-b border-gray-200">
+    <h1 class="text-2xl font-bold m-0">Logezy Widgets – Local Development Preview</h1>
+    <p class="text-sm text-gray-600 mt-1">This page lets you test all Logezy widgets locally with demo configuration.</p>
+  </header>
+
+  <main class="max-w-full">
+    <!-- Recruitment Openings Widget -->
+    <section class="mb-8 p-6 bg-white border border-gray-200 rounded-lg shadow">
+      <h2 class="text-xl font-semibold mt-0 mb-4">Recruitment Openings Widget</h2>
+      <recruitment-openings api-url="http://localhost:3000" tenant="demo_agency">
+        <div class="text-sm text-gray-600 mt-4">
+          Your browser doesn't support embedded recruitment widgets.
+          Visit
+          <a href="https://example.com/careers" class="text-blue-600 underline hover:no-underline">our careers page</a>
+          instead.
         </div>
-    </recruitment-openings>
+      </recruitment-openings>
+    </section>
+
+    <!-- Add more widgets as needed -->
+  </main>
 </body>
 
 </html>
