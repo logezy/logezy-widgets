@@ -101,9 +101,7 @@ const displayRate = computed((): string => {
       </p>
 
       <!-- Buttons -->
-      <div
-        class="flex flex-col sm:flex-row sm:flex-wrap sm:space-x-3 sm:space-y-0 mt-6"
-      >
+      <div class="flex space-x-3 mt-6">
         <a
           v-if="opening.url"
           :href="applyUrl"
