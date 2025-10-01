@@ -51,7 +51,7 @@ export async function fetchRecruitmentOpenings(apiUrl:string, tenant: string, of
   }))
 }
 
-export async function fetchRecruitmentOpeningDetail(apiUrl:string, issuer:string, tenant: string,id: string): Promise<Opening | null> {
+export async function fetchRecruitmentOpeningDetail(apiUrl:string, issuer:string, tenant: string, id: string): Promise<Opening | null> {
   const url = `${apiUrl}/v1/public/${encodeURIComponent(tenant)}/openings/${encodeURIComponent(id)}`
   
   const res = await fetch(url, {

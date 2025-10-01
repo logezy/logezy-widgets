@@ -82,7 +82,7 @@ const displayRate = computed((): string => {
         borderColor: opening.color,
       }"
     >
-      <h3 class="text-lg font-semibold text-gray-800 mb-4">Overview</h3>
+      <h3 class="text-lg font-semibold text-gray-800 mb-3">Overview</h3>
 
       <p v-if="opening.type" class="text-sm text-gray-500 mb-1">
         {{ opening.type.replace("_", " ") }}
@@ -97,24 +97,26 @@ const displayRate = computed((): string => {
       </p>
 
       <p v-if="opening.location" class="text-gray-700 mt-1">
-        <span class="font-medium">Location:</span> {{ opening.location }}
+        <span class="font-medium"></span> {{ opening.location }}
       </p>
 
       <!-- Buttons -->
-      <div class="flex space-x-3 mt-6">
+      <div
+        class="flex flex-col sm:flex-row sm:flex-wrap sm:space-x-3 sm:space-y-0 mt-6"
+      >
         <a
           v-if="opening.url"
           :href="applyUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-block px-4 py-2 text-sm font-medium bg-blue-400 text-white rounded-md hover:bg-blue-600 transition"
+          class="w-full sm:w-auto px-4 py-2 text-sm font-medium bg-blue-400 text-white rounded-md hover:bg-blue-600 transition text-center"
         >
           Apply
         </a>
 
         <button
           type="button"
-          class="inline-block px-4 py-2 text-sm font-medium bg-green-400 text-white rounded-md transition"
+          class="w-full sm:w-auto px-4 py-2 text-sm font-medium bg-green-400 text-white rounded-md hover:bg-green-600 transition text-center"
           @click="onShare"
           style="cursor: pointer"
         >

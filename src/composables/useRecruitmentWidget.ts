@@ -9,7 +9,7 @@ import {
 const offset = ref(0)
 const hasMore = ref(true)
 
-export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer:string) {
+export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:string) {
   const currentView = ref<ViewState>('list')
   const currentOpening = ref<Opening | null>(null)
   const openings = ref<Opening[]>([])
@@ -93,7 +93,7 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer:stri
     detailError.value = null
 
     try {
-      const item = await fetchRecruitmentOpeningDetail(apiUrl, issuer, tenant, id)
+      const item = await fetchRecruitmentOpeningDetail(apiUrl, issuer!, tenant, id)
       
       return item
     } catch (err: any) {
