@@ -1,7 +1,9 @@
 import type { Opening } from '../types/recruitment'
 
-export async function fetchRecruitmentOpenings(apiUrl:string, tenant: string): Promise<Opening[]> {
-  const url = `${apiUrl}/v1/public/${encodeURIComponent(tenant)}/openings?limit=10&offset=0`
+export async function fetchRecruitmentOpenings(apiUrl:string, tenant: string, offset: number): Promise<Opening[]> {
+  const url = `${apiUrl}/v1/public/${encodeURIComponent(tenant)}/openings?limit=6&offset=${offset}`
+  console.log(url)
+  
 
   const res = await fetch(url, {
     method: 'GET',
@@ -19,7 +21,7 @@ export async function fetchRecruitmentOpenings(apiUrl:string, tenant: string): P
   }
 
   const data = await res.json()
-
+  
   if (!Array.isArray(data?.data)) {
     throw new Error('Unexpected API response format (expected array)')
   }
@@ -27,10 +29,10 @@ export async function fetchRecruitmentOpenings(apiUrl:string, tenant: string): P
   return data.data.map((item: any, idx: number): Opening => ({
     id: item.id ?? item.jobId ?? `opening-${idx}`,
     title: item.title ?? item.name ?? 'Untitled',
-    role: item.role ?? item.discipline ?? item.department ?? '',
+    role: item.job.name,
     department: item.department ?? '',
-    location: item.location ?? item.city ?? '',
-    type: item.type ?? item.employmentType ?? '',
+    location: item.address ,
+    type: item.workType ?? item.employmentType ?? '',
     excerpt:
       item.excerpt ??
       item.summary ??
@@ -43,10 +45,13 @@ export async function fetchRecruitmentOpenings(apiUrl:string, tenant: string): P
     salary: item.salary,
     payRate: item.payRate,
     currency: item.currency ?? item.payCurrency ?? 'GBP',
+    color: item.job.colorCode,
+    timeSpan: item.timeSpan,
+    requirement: item.requirement,
   }))
 }
 
-export async function fetchRecruitmentOpeningDetail(apiUrl:string, tenant: string,id: string): Promise<Opening | null> {
+export async function fetchRecruitmentOpeningDetail(apiUrl:string, issuer:string, tenant: string,id: string): Promise<Opening | null> {
   const url = `${apiUrl}/v1/public/${encodeURIComponent(tenant)}/openings/${encodeURIComponent(id)}`
   
   const res = await fetch(url, {
@@ -69,9 +74,9 @@ export async function fetchRecruitmentOpeningDetail(apiUrl:string, tenant: strin
   return {
     id: item.id ?? item.jobId ?? id,
     title: item.title ?? item.name ?? 'Untitled',
-    role: item.role ?? item.discipline ?? item.department ?? '',
+    role: item.job.name,
     department: item.department ?? '',
-    location: item.location ?? item.city ?? '',
+    location: item.address ?? item.city ?? '',
     type: item.type ?? item.employmentType ?? '',
     excerpt:
       item.excerpt ??
@@ -79,11 +84,14 @@ export async function fetchRecruitmentOpeningDetail(apiUrl:string, tenant: strin
       (typeof item.description === 'string' ? item.description.slice(0, 140) : '') ??
       '',
     description: item.description ?? item.summary ?? '',
-    url: item.url ?? item.applyUrl ?? '',
+    url: item.url?item.url:`${issuer}/recruitment/${tenant}/signup`,
     rate: item.rate ?? item.hourlyRate ?? item.payRate ?? item.salary ?? undefined,
     hourlyRate: item.hourlyRate,
     salary: item.salary,
     payRate: item.payRate,
     currency: item.currency ?? item.payCurrency ?? 'GBP',
+    color:item.job.colorCode,
+    timeSpan: item.timeSpan,
+    requirement: item.requirement
   }
 }

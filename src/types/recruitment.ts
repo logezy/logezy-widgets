@@ -13,6 +13,8 @@ export interface Opening {
   salary?: number;
   payRate?: number;
   currency?: string;
+  color?:string;
+  timeSpan?:string;
+  requirement?: string;
 }
-
 export type ViewState = 'list' | 'detail';

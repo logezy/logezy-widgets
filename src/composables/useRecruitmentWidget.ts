@@ -5,7 +5,11 @@ import {
   fetchRecruitmentOpeningDetail,
 } from '../services/recruitmentService'
 
-export function useRecruitmentWidget(apiUrl: string, tenant: string) {
+
+const offset = ref(0)
+const hasMore = ref(true)
+
+export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer:string) {
   const currentView = ref<ViewState>('list')
   const currentOpening = ref<Opening | null>(null)
   const openings = ref<Opening[]>([])
@@ -49,14 +53,24 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string) {
     }
   }
 
-  const   loadOpenings= async (): Promise<void> =>{
+  const loadOpenings = async (): Promise<void> => {
     loading.value = true
     error.value = null
-    openings.value = []
-
+    offset.value = 0 
+    hasMore.value = true 
+    if(openings.value.length>0){
+      offset.value = openings.value.length
+    }
+    
     try {
-      const items = await fetchRecruitmentOpenings(apiUrl, tenant)
-      openings.value = items
+      const items = await fetchRecruitmentOpenings(apiUrl, tenant, offset.value)
+      if(items.length===0){
+        hasMore.value=false
+        loading.value=false
+      }
+      openings.value.push(...items)
+      offset.value += items.length
+  
     } catch (err: any) {
       console.error('RecruitmentOpenings fetch error:', err)
       error.value = err?.message ?? String(err)
@@ -67,17 +81,20 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string) {
   }
 
   const loadOpeningDetail= async (id: string): Promise<Opening | null> =>{
-    const existingOpening = openings.value.find((opening) => opening.id === id)
+    // const existingOpening = openings.value.find((opening) => opening.id === id)
+    // console.log(existingOpening)
+    
 
-    if (existingOpening) {
-      return existingOpening
-    }
+    // if (existingOpening) {
+    //   return existingOpening
+    // }
 
     detailLoading.value = true
     detailError.value = null
 
     try {
-      const item = await fetchRecruitmentOpeningDetail(apiUrl, tenant, id)
+      const item = await fetchRecruitmentOpeningDetail(apiUrl, issuer, tenant, id)
+      
       return item
     } catch (err: any) {
       detailError.value = err?.message ?? 'Failed to load opening details'
@@ -187,6 +204,9 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string) {
     if (openingId && currentView.value === 'list') {
       const opening = openings.value.find((o) => o.id === openingId)
 
+      console.log(opening)
+      
+
       if (opening) {
         viewDetails(opening)
       }
@@ -195,10 +215,20 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string) {
     }
   }
 
+
+  // const fetchMoreOpenings = async () => {
+    
+  //   const newOpenings = await fetchRecruitmentOpenings(apiUrl, tenant, offset.value)
+  //   if (newOpenings.length > 0) {
+  //     openings.value.push(...newOpenings)
+  //     offset.value += newOpenings.length
+  //   } else {
+  //     hasMore.value = false
+  //   }
+  // }
+
   onMounted(async () => {
     const openingId = currentOpeningId.value
-
-    await loadOpenings()
 
     if (openingId) {
       await handleDeepLink()
@@ -218,7 +248,7 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string) {
   watch(
     () => tenant,
     async () => {
-      await loadOpenings()
+     
       await handleDeepLink()
     }
   )
@@ -234,5 +264,8 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string) {
     viewDetails,
     backToList,
     share,
+    handlePopState,
+    loadOpenings,
+    hasMore,
   }
 }
