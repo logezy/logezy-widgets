@@ -1,7 +1,7 @@
 export interface Opening {
   id: string;
   title: string;
-  role?: string;
+  job?: string;
   department?: string;
   location: string;
   type: string;
@@ -17,4 +17,5 @@ export interface Opening {
   timeSpan?:string;
   requirement?: string;
 }
+
 export type ViewState = 'list' | 'detail';

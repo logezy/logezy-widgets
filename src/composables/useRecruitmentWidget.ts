@@ -5,11 +5,14 @@ import {
   fetchRecruitmentOpeningDetail,
 } from '../services/recruitmentService'
 
-
 const offset = ref(0)
 const hasMore = ref(true)
 
-export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:string) {
+export function useRecruitmentWidget(
+  issuer: string,
+  apiUrl: string,
+  tenant: string
+) {
   const currentView = ref<ViewState>('list')
   const currentOpening = ref<Opening | null>(null)
   const openings = ref<Opening[]>([])
@@ -33,17 +36,15 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
     scrollPosition.value = window.scrollY || document.documentElement.scrollTop
   }
 
-  const restoreScrollPosition=(): void=> {
+  const restoreScrollPosition = (): void => {
     nextTick(() => {
       window.scrollTo(0, scrollPosition.value)
     })
   }
 
-  const updateHash=(openingId?: string): void =>{
+  const updateHash = (openingId?: string): void => {
     if (typeof window === 'object') {
-      const hashed = openingId
-        ? `#opening=${encodeURIComponent(openingId)}`
-        : ''
+      const hashed = openingId ? `#opening=${encodeURIComponent(openingId)}` : ''
 
       if (window.location.hash === hashed) {
         return
@@ -54,47 +55,50 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
   }
 
   const loadOpenings = async (): Promise<void> => {
+    if (loading.value) {
+      return
+    }
+
+    if (hasMore.value === false) {
+      return
+    }
+
     loading.value = true
     error.value = null
-    offset.value = 0 
-    hasMore.value = true 
-    if(openings.value.length>0){
-      offset.value = openings.value.length
-    }
-    
+
     try {
-      const items = await fetchRecruitmentOpenings(apiUrl, tenant, offset.value)
-      if(items.length===0){
-        hasMore.value=false
-        loading.value=false
+      const items = await fetchRecruitmentOpenings(
+        apiUrl,
+        tenant,
+        offset.value
+      )
+
+      if (items.length === 0) {
+        hasMore.value = false
+      } else {
+        openings.value.push(...items)
+        offset.value += items.length
       }
-      openings.value.push(...items)
-      offset.value += items.length
-  
     } catch (err: any) {
       console.error('RecruitmentOpenings fetch error:', err)
       error.value = err?.message ?? String(err)
-      openings.value = []
     } finally {
       loading.value = false
     }
   }
 
-  const loadOpeningDetail= async (id: string): Promise<Opening | null> =>{
-    // const existingOpening = openings.value.find((opening) => opening.id === id)
-    // console.log(existingOpening)
-    
-
-    // if (existingOpening) {
-    //   return existingOpening
-    // }
-
+  const loadOpeningDetail = async (id: string): Promise<Opening | null> => {
     detailLoading.value = true
     detailError.value = null
 
     try {
-      const item = await fetchRecruitmentOpeningDetail(apiUrl, issuer!, tenant, id)
-      
+      const item = await fetchRecruitmentOpeningDetail(
+        issuer,
+        apiUrl,
+        tenant,
+        id
+      )
+
       return item
     } catch (err: any) {
       detailError.value = err?.message ?? 'Failed to load opening details'
@@ -104,7 +108,7 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
     }
   }
 
-  const viewDetails= async (opening: Opening): Promise<void> =>{
+  const viewDetails = async (opening: Opening): Promise<void> => {
     saveScrollPosition()
 
     const detailedOpening = await loadOpeningDetail(opening.id)
@@ -125,32 +129,25 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
     }
   }
 
-  const backToList=(): void=> {
+  const backToOpenings = (): void => {
     currentView.value = 'list'
     currentOpening.value = null
     updateHash()
     restoreScrollPosition()
 
     nextTick(() => {
-      const listElement = document.querySelector(
-        '[data-testid="openings-list"]'
-      ) as HTMLElement
+      const listElement = document.querySelector('[data-testid="openings-list"]') as HTMLElement
+
       if (listElement) {
         listElement.focus()
       }
     })
   }
 
-  const share= async (opening: Opening): Promise<void> =>{
-    const url =
-      opening.url ||
-      `${window.location.origin}${
-        window.location.pathname
-      }#opening=${encodeURIComponent(opening.id)}`
+  const share = async (opening: Opening): Promise<void> => {
+    const url = opening.url || `${window.location.origin}${window.location.pathname}#opening=${encodeURIComponent(opening.id)}`
     const title = opening.title || 'Opening'
-    const text = `${opening.title}${
-      opening.location ? ' · ' + opening.location : ''
-    }${opening.type ? ' · ' + opening.type : ''}`
+    const text = `${opening.title}${opening.location ? ' · ' + opening.location : ''}${opening.type ? ' · ' + opening.type : ''}`
 
     if (navigator.share) {
       try {
@@ -168,7 +165,7 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
     }
   }
 
-  const handleDeepLink= async (): Promise<void>=> {
+  const handleDeepLink = async (): Promise<void> => {
     const openingId = currentOpeningId.value
 
     if (!openingId) return
@@ -198,34 +195,19 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
     }
   }
 
-  const handlePopState=(): void =>{
+  const handlePopState = (): void => {
     const openingId = currentOpeningId.value
 
     if (openingId && currentView.value === 'list') {
       const opening = openings.value.find((o) => o.id === openingId)
 
-      console.log(opening)
-      
-
       if (opening) {
         viewDetails(opening)
       }
     } else if (!openingId && currentView.value === 'detail') {
-      backToList()
+      backToOpenings()
     }
   }
-
-
-  // const fetchMoreOpenings = async () => {
-    
-  //   const newOpenings = await fetchRecruitmentOpenings(apiUrl, tenant, offset.value)
-  //   if (newOpenings.length > 0) {
-  //     openings.value.push(...newOpenings)
-  //     offset.value += newOpenings.length
-  //   } else {
-  //     hasMore.value = false
-  //   }
-  // }
 
   onMounted(async () => {
     const openingId = currentOpeningId.value
@@ -247,9 +229,14 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
 
   watch(
     () => tenant,
-    async () => {
-     
-      await handleDeepLink()
+    () => {
+      openings.value = []
+      offset.value = 0
+      hasMore.value = true
+      currentView.value = 'list'
+      currentOpening.value = null
+      updateHash()
+      loadOpenings()
     }
   )
 
@@ -262,7 +249,7 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
     detailLoading,
     detailError,
     viewDetails,
-    backToList,
+    backToOpenings,
     share,
     handlePopState,
     loadOpenings,

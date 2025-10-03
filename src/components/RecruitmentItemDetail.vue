@@ -1,128 +1,81 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import type { Opening } from "../types/recruitment";
-import { stripHtmlTags } from "../helpers/recruitment.helper";
+import type { Opening } from '../types/recruitment'
+import { stripHtmlTags } from '../helpers/recruitment.helper'
+import { useRate } from '../composables/useRate'
 
-interface Props {
-  opening: Opening;
-  onShare: () => void;
-  onBackToList: () => void;
-}
+const props = defineProps<{
+  opening: Opening
+}>()
 
-const props = defineProps<Props>();
-const applyUrl = props.opening.url
-  ? `${props.opening.url}?id=${props.opening.id}`
-  : "";
+const emit = defineEmits<{
+  share: [opening: Opening]
+  'back-to-list': []
+}>()
 
-const displayRate = computed((): string => {
-  const amount =
-    props.opening.rate ??
-    props.opening.hourlyRate ??
-    props.opening.salary ??
-    props.opening.payRate ??
-    null;
+const { displayRate } = useRate(props.opening)
 
-  if (amount == null) return "";
-
-  const currency = props.opening.currency || "GBP";
-
-  try {
-    const fmt = new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    });
-    return fmt.format(Number(amount));
-  } catch {
-    const symbol = currency === "GBP" ? "£" : currency === "USD" ? "$" : "";
-    return `${symbol}${Number(amount).toFixed(2)}`;
-  }
-});
+const applyUrl = props.opening.url ? `${props.opening.url}?id=${props.opening.id}` : ''
 </script>
-<template>
-  <main class="mx-auto px-3 grid grid-cols-12 gap-8">
-    <!-- Left Card: Description & Requirements -->
-    <div
-      class="col-span-12 lg:col-span-10 bg-white rounded-lg border-2 border-dashed p-6 transition"
-      :style="{
-        backgroundColor: `${opening.color}10`,
-        borderColor: opening.color,
-      }"
-    >
-      <!-- Title -->
-      <h2
-        :id="`detail-title-${opening.id}`"
-        class="text-lg font-semibold text-gray-800 mb-4"
-      >
-        {{ opening.title }}
-      </h2>
 
-      <!-- Description -->
-      <div v-if="opening.description" class="mb-4">
-        <p class="font-medium text-gray-700">Description:</p>
-        <p class="text-gray-600 whitespace-pre-wrap">
-          {{ stripHtmlTags(opening.description) }}
-        </p>
+<template>
+  <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+    <!-- Main Content -->
+    <div class="rounded-2xl p-8 shadow-sm border lg:col-span-2" :style="{
+      backgroundColor: `${opening.color}10`,
+      borderColor: opening.color,
+    }">
+      <h2 class="text-3xl font-bold text-gray-900">{{ opening.title }}</h2>
+
+      <div v-if="opening.description" class="mt-6 text-gray-700 leading-relaxed">
+        <p>{{ stripHtmlTags(opening.description) }}</p>
       </div>
 
-      <!-- Requirements -->
-      <div v-if="opening.requirement">
-        <p class="font-medium text-gray-700">Requirement:</p>
-        <p class="text-gray-600 whitespace-pre-wrap">
+      <div v-if="opening.requirement" class="mt-8">
+        <h4 class="text-lg font-semibold text-gray-900">Requirements</h4>
+        <p class="mt-2 text-gray-700 leading-relaxed">
           {{ stripHtmlTags(opening.requirement) }}
         </p>
       </div>
     </div>
 
-    <!-- Right Card: Overview & Actions -->
-    <div
-      class="col-span-12 lg:col-span-2 bg-blue-50 rounded-lg border-2 border-dashed p-6 transition h-[300px]"
-      :style="{
-        backgroundColor: `${opening.color}10`,
-        borderColor: opening.color,
-      }"
-    >
-      <h3 class="text-lg font-semibold text-gray-800 mb-3">Overview</h3>
+    <!-- Sidebar -->
+    <aside class="lg:col-span-1">
+      <div class="rounded-2xl bg-gray-50 p-6 shadow-sm lg:sticky lg:top-6">
+        <h3 class="text-lg font-semibold text-gray-900">Overview</h3>
 
-      <p v-if="opening.type" class="text-sm text-gray-500 mb-1">
-        {{ opening.type.replace("_", " ") }}
-      </p>
+        <dl class="mt-4 space-y-3">
+          <div class="flex justify-between">
+            <dt class="text-sm text-gray-500">Job Type</dt>
+            <dd class="text-sm font-medium text-gray-800 capitalize">{{ opening.type.replace('_', ' ') }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-sm text-gray-500">Rate</dt>
+            <dd class="text-sm font-semibold text-green-600">{{ displayRate }}/{{ opening.timeSpan }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-sm text-gray-500">Job Role</dt>
+            <dd class="text-sm font-medium text-gray-800">{{ opening.job }}</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-sm text-gray-500">Location</dt>
+            <dd class="text-sm font-medium text-gray-800">{{ opening.location }}</dd>
+          </div>
+        </dl>
 
-      <p v-if="displayRate" class="text-green-600 font-semibold mb-4">
-        {{ displayRate }}/{{ opening.timeSpan }}
-      </p>
+        <!-- Actions -->
+        <div class="mt-6 flex flex-col gap-3">
+          <a v-if="opening.url" :href="applyUrl" target="_blank" rel="noopener noreferrer"
+            class="inline-flex h-11 items-center justify-center rounded-md bg-indigo-600 px-6 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer">
+            Apply Now
+          </a>
 
-      <p v-if="opening.role" class="text-gray-700">
-        <span class="font-medium">Role:</span> {{ opening.role }}
-      </p>
-
-      <p v-if="opening.location" class="text-gray-700 mt-1">
-        <span class="font-medium"></span> {{ opening.location }}
-      </p>
-
-      <!-- Buttons -->
-      <div class="flex space-x-3 mt-6">
-        <a
-          v-if="opening.url"
-          :href="applyUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="w-full sm:w-auto px-4 py-2 text-sm font-medium bg-blue-400 text-white rounded-md hover:bg-blue-600 transition text-center"
-        >
-          Apply
-        </a>
-
-        <button
-          type="button"
-          class="w-full sm:w-auto px-4 py-2 text-sm font-medium bg-green-400 text-white rounded-md hover:bg-green-600 transition text-center"
-          @click="onShare"
-          style="cursor: pointer"
-        >
-          Share
-        </button>
+          <button type="button"
+            class="inline-flex h-11 items-center justify-center rounded-md border border-indigo-200 bg-white px-6 text-sm font-medium text-indigo-600 shadow-sm hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
+            @click="emit('share', opening)">
+            Share
+          </button>
+        </div>
       </div>
-    </div>
-  </main>
+    </aside>
+  </div>
 </template>
-
-<style scoped></style>
