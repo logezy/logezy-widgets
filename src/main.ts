@@ -12,12 +12,12 @@ export const widgets: readonly Widget[] = [
   // Add more widgets here
 ] as const
 
-const registerWidgets = (list: ReadonlyArray<Widget>, styleText: string): void => {
+const registerWidgets = (list: ReadonlyArray<Widget>, tailwindCss: string): void => {
   list.forEach(({ name, component }) => {
     if (customElements.get(name) === undefined) {
       const element = defineCustomElement({
         ...(component as unknown as Component),
-        styles: [styleText],
+        styles: [tailwindCss],
       })
       
       customElements.define(name, element)
