@@ -5,8 +5,8 @@ import RecruitmentItemDetail from "../components/RecruitmentItemDetail.vue";
 import { useRecruitmentWidget } from "../composables/useRecruitmentWidget";
 
 interface RecruitmentOpeningsProps {
+  issuer: string;
   apiUrl: string;
-  issuer?: string;
   tenant: string;
 }
 
@@ -22,13 +22,13 @@ const {
   detailError,
   detailPageRefreshed,
   viewDetails,
-  backToList,
+  backToOpenings,
   share,
   loadOpenings,
   hasMore,
-} = useRecruitmentWidget(props.apiUrl, props.tenant, props.issuer);
+} = useRecruitmentWidget(props.issuer, props.apiUrl, props.tenant);
 
-const sentinel = ref(null);
+const sentinel = ref<HTMLElement | null>(null);
 let observer: IntersectionObserver | null = null;
 
 onMounted(() => {
@@ -46,12 +46,24 @@ onMounted(() => {
     observer.observe(sentinel.value);
   }
 
-  loadOpenings(); // initial load
+  loadOpenings();
+});
+
+watch(sentinel, (newSentinel, oldSentinel) => {
+  if (observer) {
+    if (oldSentinel) {
+      observer.unobserve(oldSentinel);
+    }
+
+    if (newSentinel) {
+      observer.observe(newSentinel);
+    }
+  }
 });
 
 onUnmounted(() => {
-  if (observer && sentinel.value) {
-    observer.unobserve(sentinel.value);
+  if (observer) {
+    observer.disconnect();
   }
 });
 
@@ -74,7 +86,7 @@ watch(detailPageRefreshed, (detailPageRefreshed) => {
 <template>
   <div
     part="root"
-    class="w-full rounded-2xl border border-gray-200/80 bg-white/90 shadow-lg backdrop-blur-sm p-4 md:p-6"
+    class="w-full rounded-2xl border border-gray-200/80 bg-white/90 p-4 shadow-lg backdrop-blur-sm md:p-6"
   >
     <!-- Header -->
     <header part="header" class="mb-4 flex items-center justify-between">
@@ -83,8 +95,8 @@ watch(detailPageRefreshed, (detailPageRefreshed) => {
         <button
           v-if="currentView === 'detail'"
           type="button"
-          class="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500"
-          @click="backToList"
+          class="inline-flex items-center justify-center rounded-lg p-2 text-gray-600 transition hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 cursor-pointer"
+          @click="backToOpenings"
           aria-label="Back to job listings"
         >
           <svg
@@ -103,7 +115,7 @@ watch(detailPageRefreshed, (detailPageRefreshed) => {
           <span v-if="currentView === 'list'">Openings</span>
           <span
             v-else-if="currentOpening"
-            class="truncate max-w-xs sm:max-w-sm"
+            class="max-w-xs truncate sm:max-w-sm"
           >
             {{ currentOpening.title }}
           </span>
@@ -128,13 +140,8 @@ watch(detailPageRefreshed, (detailPageRefreshed) => {
           <span class="font-medium">Error:</span> {{ error }}
         </div>
 
-        <!-- List -->
-
-        <!-- Opening cards -->
-        <div
-          v-if="currentView === 'list'"
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8"
-        >
+        <!-- Openings Grid -->
+        <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
           <RecruitmentItemCard
             v-for="opening in openings"
             :key="opening.id"
@@ -143,6 +150,8 @@ watch(detailPageRefreshed, (detailPageRefreshed) => {
             @share="share(opening)"
           />
         </div>
+
+        <!-- Sentinel for infinite scroll -->
         <div
           ref="sentinel"
           class="flex justify-center py-4"
@@ -151,7 +160,7 @@ watch(detailPageRefreshed, (detailPageRefreshed) => {
           <div v-if="loading" role="status">
             <svg
               aria-hidden="true"
-              class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+              class="h-8 w-8 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -208,17 +217,17 @@ watch(detailPageRefreshed, (detailPageRefreshed) => {
           v-else
           :opening="currentOpening"
           @share="share(currentOpening)"
-          @back-to-list="backToList"
+          @back-to-list="backToOpenings"
         />
 
         <div class="pt-4 ml-auto">
           <button
             type="button"
             style="cursor: pointer"
-            class="text-blue-600 hover:text-blue-800 text-md"
-            @click="backToList"
+            class="text-md text-blue-600 hover:text-blue-800 cursor-pointer"
+            @click="backToOpenings"
           >
-            ← Back to listings
+            ← Back to openings
           </button>
         </div>
       </div>

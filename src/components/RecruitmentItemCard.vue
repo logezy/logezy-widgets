@@ -1,102 +1,60 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import type { Opening } from "../types/recruitment";
-import { stripHtmlTags } from "../helpers/recruitment.helper";
-// import { fetchRecruitmentOpenings } from "@/services/recruitmentService";
+import type { Opening } from '../types/recruitment'
+import { stripHtmlTags } from '../helpers/recruitment.helper'
+import { useRate } from '../composables/useRate'
 
-interface Props {
+const props = defineProps<{
   opening: Opening;
-  onViewDetails: () => void;
-  onShare: () => void;
-}
+}>()
 
-const props = defineProps<Props>();
+const emit = defineEmits<{
+  'view-details': [opening: Opening]
+  'share': [opening: Opening]
+}>()
 
-const displayRate = computed((): string => {
-  const amount =
-    props.opening.rate ??
-    props.opening.hourlyRate ??
-    props.opening.salary ??
-    props.opening.payRate ??
-    null;
-
-  if (amount == null) return "";
-
-  const currency = props.opening.currency || "GBP";
-
-  try {
-    const fmt = new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    });
-    return fmt.format(Number(amount));
-  } catch {
-    const symbol = currency === "GBP" ? "£" : currency === "USD" ? "$" : "";
-    return `${symbol}${Number(amount).toFixed(2)}`;
-  }
-});
+const { displayRate } = useRate(props.opening)
 </script>
+
 <template>
   <div
-    class="rounded-lg border-2 border-dashed p-6 transition hover:border-opacity-80"
+    class="flex flex-col justify-between rounded-2xl border p-6 shadow-md transition-shadow duration-300 hover:shadow-lg"
     :style="{
       backgroundColor: `${opening.color}10`,
       borderColor: opening.color,
-    }"
-    :aria-labelledby="`opening-title-${opening.id}`"
-  >
-    <!-- Title -->
-    <div class="flex justify-between items-center flex-wrap gap-2">
-      <!-- Title on the left -->
-      <h3
-        :id="`opening-title-${opening.id}`"
-        class="text-lg font-semibold text-gray-800"
-      >
-        {{ opening.title }}
-      </h3>
-
-      <!-- Rate on the right -->
-      <p v-if="displayRate" class="text-green-600 font-semibold text-lg">
-        {{ displayRate }}/{{ opening.timeSpan }}
+    }">
+    <div class="flex-grow">
+      <div class="flex items-start justify-between">
+        <div class="pr-4">
+          <h3 class="text-xl font-semibold text-gray-900">
+            {{ opening.title }}
+          </h3>
+          <p class="capitalize mt-1 text-sm text-gray-500">
+            {{ opening.job || opening.department }} ·
+            {{ opening.type?.replace("_", " ") }}
+          </p>
+        </div>
+        <div v-if="displayRate" class="text-right">
+          <span class="inline-block rounded-md bg-green-100 px-2 py-1 capitalize font-bold text-green-700">
+            {{ displayRate }}/{{ opening.timeSpan }}
+          </span>
+        </div>
+      </div>
+      <p v-if="opening.location" class="mt-4 capitalize text-base text-gray-600">
+        {{ opening.location }}
+      </p>
+      <p v-if="opening.excerpt" class="mt-3 text-sm text-gray-700 line-clamp-3">
+        {{ stripHtmlTags(opening.excerpt) }}
       </p>
     </div>
-
-    <!-- Meta Info -->
-    <p class="text-sm text-gray-500 capitalize mb-3">
-      Role: {{ opening.role || opening.department }} | Job Type:
-      {{ opening.type?.replace("_", " ") }}
-    </p>
-
-    <!-- Pay Rate -->
-
-    <p v-if="opening.location" class="text-gray-700 mt-1 truncate w-full">
-      <span class="font-medium">Location:</span> {{ opening.location }}
-    </p>
-
-    <!-- Description -->
-    <p v-if="opening.excerpt" class="text-gray-600 mb-4 truncate w-full">
-      <span class="font-medium">Description:</span>
-      {{ stripHtmlTags(opening.excerpt) }}
-    </p>
-
-    <!-- Actions -->
-    <div class="flex flex-wrap items-center gap-3">
-      <button
-        style="background-color: #60a5fa; cursor: pointer"
-        type="button"
-        class="inline-block px-4 py-2 text-sm font-medium text-white rounded-md transition"
-        @click="onViewDetails"
-      >
+    <div class="mt-6 grid grid-cols-2 gap-4">
+      <button type="button"
+        class="inline-flex h-10 items-center justify-center rounded-md bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
+        @click="emit('view-details', opening)">
         Details
       </button>
-
-      <button
-        type="button"
-        style="background-color: #4ade80; cursor: pointer"
-        class="inline-block px-4 py-2 text-sm font-medium text-white rounded-md transition"
-        @click="onShare"
-      >
+      <button type="button"
+        class="inline-flex h-10 items-center justify-center rounded-md border border-indigo-200 bg-white px-4 text-sm font-medium text-indigo-600 shadow-sm transition-colors hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
+        @click="emit('share', opening)">
         Share
       </button>
     </div>
