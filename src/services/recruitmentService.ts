@@ -2,9 +2,7 @@ import type { Opening } from '../types/recruitment'
 
 export async function fetchRecruitmentOpenings(apiUrl:string, tenant: string, offset: number): Promise<Opening[]> {
   const url = `${apiUrl}/v1/public/${encodeURIComponent(tenant)}/openings?limit=6&offset=${offset}`
-  console.log(url)
   
-
   const res = await fetch(url, {
     method: 'GET',
     credentials: 'omit',

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import RecruitmentItemCard from "../components/RecruitmentItemCard.vue";
 import RecruitmentItemDetail from "../components/RecruitmentItemDetail.vue";
 import { useRecruitmentWidget } from "../composables/useRecruitmentWidget";
@@ -20,6 +20,7 @@ const {
   error,
   detailLoading,
   detailError,
+  detailPageRefreshed,
   viewDetails,
   backToList,
   share,
@@ -31,6 +32,8 @@ const sentinel = ref(null);
 let observer: IntersectionObserver | null = null;
 
 onMounted(() => {
+  console.log("hi");
+
   observer = new IntersectionObserver(([entry]) => {
     if (entry.isIntersecting && hasMore.value && !loading.value) {
       loadOpenings();
@@ -38,6 +41,8 @@ onMounted(() => {
   });
 
   if (sentinel.value) {
+    console.log(sentinel.value);
+
     observer.observe(sentinel.value);
   }
 
@@ -47,6 +52,21 @@ onMounted(() => {
 onUnmounted(() => {
   if (observer && sentinel.value) {
     observer.unobserve(sentinel.value);
+  }
+});
+
+watch(detailPageRefreshed, (detailPageRefreshed) => {
+  console.log("works");
+  if (detailPageRefreshed && sentinel.value) {
+    console.log("worked");
+
+    observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && hasMore.value && !loading.value) {
+        loadOpenings();
+      }
+    });
+
+    observer.observe(sentinel.value);
   }
 });
 </script>

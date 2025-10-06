@@ -9,6 +9,7 @@ import {
 const offset = ref(0)
 const hasMore = ref(true)
 
+
 export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:string) {
   const currentView = ref<ViewState>('list')
   const currentOpening = ref<Opening | null>(null)
@@ -18,6 +19,7 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
   const detailLoading = ref<boolean>(false)
   const detailError = ref<string | null>(null)
   const scrollPosition = ref<number>(0)
+  const detailPageRefreshed = ref<boolean>(false)
 
   const currentOpeningId = computed(() => {
     if (typeof window === 'object') {
@@ -126,6 +128,12 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
   }
 
   const backToList=(): void=> {
+    console.log(currentView.value)
+    
+
+    if(currentView.value === 'detail'){
+      detailPageRefreshed.value = true
+    }
     currentView.value = 'list'
     currentOpening.value = null
     updateHash()
@@ -261,6 +269,7 @@ export function useRecruitmentWidget(apiUrl: string, tenant: string, issuer?:str
     error,
     detailLoading,
     detailError,
+    detailPageRefreshed,
     viewDetails,
     backToList,
     share,
