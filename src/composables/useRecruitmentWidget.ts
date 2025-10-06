@@ -22,7 +22,6 @@ export function useRecruitmentWidget(
   const detailLoading = ref<boolean>(false)
   const detailError = ref<string | null>(null)
   const scrollPosition = ref<number>(0)
-  const detailPageRefreshed = ref<boolean>(false)
 
   const currentOpeningId = computed(() => {
     if (typeof window === 'object') {
@@ -111,12 +110,12 @@ export function useRecruitmentWidget(
   }
 
   const viewDetails = async (opening: Opening): Promise<void> => {
+    currentView.value = 'detail'
     saveScrollPosition()
 
     const detailedOpening = await loadOpeningDetail(opening.id)
     if (detailedOpening) {
       currentOpening.value = detailedOpening
-      currentView.value = 'detail'
       updateHash(opening.id)
 
       nextTick(() => {
@@ -250,7 +249,6 @@ export function useRecruitmentWidget(
     error,
     detailLoading,
     detailError,
-    detailPageRefreshed,
     viewDetails,
     backToOpenings,
     share,
