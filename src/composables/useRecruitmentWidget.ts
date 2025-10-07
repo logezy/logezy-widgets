@@ -8,6 +8,7 @@ import {
 const offset = ref(0)
 const hasMore = ref(true)
 
+
 export function useRecruitmentWidget(
   issuer: string,
   apiUrl: string,
@@ -109,12 +110,12 @@ export function useRecruitmentWidget(
   }
 
   const viewDetails = async (opening: Opening): Promise<void> => {
+    currentView.value = 'detail'
     saveScrollPosition()
 
     const detailedOpening = await loadOpeningDetail(opening.id)
     if (detailedOpening) {
       currentOpening.value = detailedOpening
-      currentView.value = 'detail'
       updateHash(opening.id)
 
       nextTick(() => {
