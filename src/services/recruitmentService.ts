@@ -3,8 +3,8 @@ import type { Opening } from '../types/recruitment'
 function transformOpening(
   item: any,
   idx: number = 0,
-  issuer?: string,
-  tenant?: string
+  issuerUrl?: string,
+  tenantSlug?: string
 ): Opening {
   return {
     id: item.id ?? item.jobId ?? `opening-${idx}`,
@@ -15,7 +15,7 @@ function transformOpening(
     type: item.workType ?? item.employmentType ?? '',
     excerpt: item.excerpt ?? item.summary ?? (typeof item.description === 'string' ? item.description.slice(0, 140) : '') ?? '',
     description: item.description ?? item.summary ?? '',
-    url: item.url ?? (issuer && tenant ? `${issuer}/recruitment/${tenant}/signup` : ''),
+    url: item.url ?? (issuerUrl && tenantSlug ? `${issuerUrl}/recruitment/${tenantSlug}/signup` : ''),
     rate: item.rate ?? item.hourlyRate ?? item.payRate ?? item.salary ?? undefined,
     hourlyRate: item.hourlyRate,
     salary: item.salary,
@@ -29,11 +29,11 @@ function transformOpening(
 
 export async function fetchRecruitmentOpenings(
   apiUrl: string,
-  tenant: string,
+  tenantSlug: string,
   offset: number
 ): Promise<Opening[]> {
-  const url = `${apiUrl}/v1/public/${encodeURIComponent(
-    tenant
+  const url = `${apiUrl}/public/${encodeURIComponent(
+    tenantSlug
   )}/openings?limit=6&offset=${offset}`
 
   const res = await fetch(url, {
@@ -61,13 +61,13 @@ export async function fetchRecruitmentOpenings(
 }
 
 export async function fetchRecruitmentOpeningDetail(
-  issuer: string,
+  issuerUrl: string,
   apiUrl: string,
-  tenant: string,
+  tenantSlug: string,
   id: string
 ): Promise<Opening | null> {
-  const url = `${apiUrl}/v1/public/${encodeURIComponent(
-    tenant
+  const url = `${apiUrl}/public/${encodeURIComponent(
+    tenantSlug
   )}/openings/${encodeURIComponent(id)}`
 
   const res = await fetch(url, {
@@ -84,7 +84,7 @@ export async function fetchRecruitmentOpeningDetail(
     const data = await res.json()
     const item = data.data || data
 
-    return transformOpening(item, 0, issuer, tenant)
+    return transformOpening(item, 0, issuerUrl, tenantSlug)
   }
 
   throw new Error('Opening not found')

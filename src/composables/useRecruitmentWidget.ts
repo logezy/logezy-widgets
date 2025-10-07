@@ -10,9 +10,9 @@ const hasMore = ref(true)
 
 
 export function useRecruitmentWidget(
-  issuer: string,
+  issuerUrl: string,
   apiUrl: string,
-  tenant: string
+  tenantSlug: string
 ) {
   const currentView = ref<ViewState>('list')
   const currentOpening = ref<Opening | null>(null)
@@ -70,7 +70,7 @@ export function useRecruitmentWidget(
     try {
       const items = await fetchRecruitmentOpenings(
         apiUrl,
-        tenant,
+        tenantSlug,
         offset.value
       )
 
@@ -94,9 +94,9 @@ export function useRecruitmentWidget(
 
     try {
       const item = await fetchRecruitmentOpeningDetail(
-        issuer,
+        issuerUrl,
         apiUrl,
-        tenant,
+        tenantSlug,
         id
       )
 
@@ -229,7 +229,7 @@ export function useRecruitmentWidget(
   })
 
   watch(
-    () => tenant,
+    () => tenantSlug,
     () => {
       openings.value = []
       offset.value = 0
