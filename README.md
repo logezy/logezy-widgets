@@ -136,7 +136,7 @@ To use the widget, include one of the following script tags in your HTML file, t
   src="https://cdn.jsdelivr.net/gh/logezy/logezy-widgets@build/widgets.esm.js"
 ></script>
 
-<recruitment-openings api-url="base url" tenant="tenant_slug">
+<recruitment-openings issuer-url="issuer url" api-url="base url" tenant-slug="tenant_slug">
   <div>
     Your browser doesn't support embedded opening widgets. Visit
     <a href="https://logezy.com">our careers</a>.
@@ -149,7 +149,7 @@ To use the widget, include one of the following script tags in your HTML file, t
 ```html
 <script src="https://cdn.jsdelivr.net/gh/logezy/logezy-widgets@build/widgets.min.js"></script>
 
-<recruitment-openings api-url="base url" tenant="tenant_slug">
+<recruitment-openings issuer-url="issuer url" api-url="base url" tenant-slug="tenant_slug">
   <div>
     Your browser doesn't support embedded opening widgets. Visit
     <a href="https://logezy.com">our careers</a>.
