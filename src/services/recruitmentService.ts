@@ -1,40 +1,36 @@
 import type { Opening } from '../types/recruitment'
 
-function transformOpening(
+const transformOpening = (
   item: any,
-  idx: number = 0,
+  idx = 0,
   issuerUrl?: string,
   tenantSlug?: string
-): Opening {
+): Opening => {
+  const hasSignupUrl = issuerUrl ? tenantSlug : false
+
   return {
-    id: item.id ?? item.jobId ?? `opening-${idx}`,
-    title: item.title ?? item.name ?? 'Untitled',
-    job: item.job.name,
-    department: item.department ?? '',
-    location: item.address,
-    type: item.workType ?? item.employmentType ?? '',
-    excerpt: item.excerpt ?? item.summary ?? (typeof item.description === 'string' ? item.description.slice(0, 140) : '') ?? '',
-    description: item.description ?? item.summary ?? '',
-    url: item.url ?? (issuerUrl && tenantSlug ? `${issuerUrl}/recruitment/${tenantSlug}/signup` : ''),
-    rate: item.rate ?? item.hourlyRate ?? item.payRate ?? item.salary ?? undefined,
-    hourlyRate: item.hourlyRate,
-    salary: item.salary,
-    payRate: item.payRate,
-    currency: item.currency ?? item.payCurrency ?? 'GBP',
-    color: item.job.colorCode,
+    id: item.id ?? `opening-${idx}`,
+    title: item.title ?? 'Untitled',
+    job: item.job?.name ?? '',
+    color: item.job?.colorCode,
+    location: item.address ?? '',
+    type: item.workType ?? '',
+    excerpt: typeof item.description === 'string' ? item.description.slice(0, 140) : '',
+    description: item.description ?? '',
+    url: item.url ?? (hasSignupUrl ? `${issuerUrl}/recruitment/${tenantSlug}/signup` : ''),
+    rate: item.rate,
+    currency: item.currency ?? 'GBP',
     timeSpan: item.timeSpan,
     requirement: item.requirement,
   }
 }
 
-export async function fetchRecruitmentOpenings(
+export const fetchRecruitmentOpenings = async (
   apiUrl: string,
   tenantSlug: string,
-  offset: number
-): Promise<Opening[]> {
-  const url = `${apiUrl}/public/${encodeURIComponent(
-    tenantSlug
-  )}/openings?limit=6&offset=${offset}`
+  offset: number,
+): Promise<Opening[]> => {
+  const url = `${apiUrl}/public/${encodeURIComponent(tenantSlug)}/openings?limit=6&offset=${offset}`
 
   const res = await fetch(url, {
     method: 'GET',
@@ -46,29 +42,37 @@ export async function fetchRecruitmentOpenings(
     },
   })
 
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`${res.status} ${res.statusText} — ${text}`)
-  }
+  if (res.ok) {
+    const data = await res.json()
+    const openings = data?.data
 
-  const data = await res.json()
+    if (Array.isArray(openings)) {
+      return openings.map(
+        (item: any, idx: number) =>
+          transformOpening(
+            item,
+            idx,
+            apiUrl,
+            tenantSlug,
+          ),
+      )
+    }
 
-  if (!Array.isArray(data?.data)) {
     throw new Error('Unexpected API response format (expected array)')
   }
 
-  return data.data.map((item: any, idx: number) => transformOpening(item, idx))
+  const text = await res.text()
+
+  throw new Error(`${res.status} ${res.statusText} — ${text}`)
 }
 
-export async function fetchRecruitmentOpeningDetail(
+export const fetchRecruitmentOpeningDetail = async (
   issuerUrl: string,
   apiUrl: string,
   tenantSlug: string,
-  id: string
-): Promise<Opening | null> {
-  const url = `${apiUrl}/public/${encodeURIComponent(
-    tenantSlug
-  )}/openings/${encodeURIComponent(id)}`
+  id: string,
+): Promise<Opening | null> => {
+  const url = `${apiUrl}/public/${encodeURIComponent(tenantSlug)}/openings/${encodeURIComponent(id)}`
 
   const res = await fetch(url, {
     method: 'GET',
